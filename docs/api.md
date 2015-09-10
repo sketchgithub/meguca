@@ -1,6 +1,34 @@
-The read-only JSON API currently supports 4 modes of query.
+#Websockets
 
-####Format
+Note: While meguca supports pure websocket protocol communication, it is not 
+reccomended in production, as many proxies and CDNs your server or the client
+may be behind don't yet support websockets. For these compatability reasons,
+you are recommended to use [SockJS](https://github.com/sockjs), when 
+interfacing with a meguca server.
+
+Webosocket frames are JSON arrays. The message is contained inside a single 
+array in these frames. For example `[[0,0,"Install Gentoo"]]`.
+
+###Legend
+- op: int; the thread the message is dericted at; 0 denotes a global message
+- bool: `0` or `1`
+
+##Server -> Client
+Most messages begin with 2 positive integers. The first one denoting the OP 
+and the seccond the message kind, which can be seen in `common/index`.
+- INVALID: `[op,0,reason]`; 
+	- client has been forcefully disconnected from the server
+	- reason: string: Reason for the disconnect
+- INSERT_POST: `[op,2,object,bump]`
+	- post: [post object](#post-object)
+	- bump: bool: weather the thread the post is inserted into should be bumped
+- UPDATE_POST: `[op,3,]`
+
+##Client -> Server
+
+
+#JSON
+##Format
 | Query | URL | Returns |
 |:-------:|:----------------------------:|:-------------------------------:|
 | post | /api/post/${post number} | [post object](#post-object) |
@@ -11,7 +39,7 @@ The read-only JSON API currently supports 4 modes of query.
 \* `last?=n` is optional. `n` indicates the number of replies to retrieve from the thread bottom
 \*\* Formated as `{config, hot}`. For an explanation of each exposed variable see `./config`
 
-####Post object
+##Post object
 | Key | Value | Optional | Exclusive | Example |
 |:-------:|:----------------------------------------------------------------------------------------------------------------:|:--------:|:---------:|:------------------------------------------:|
 | time | Unix timestamp in ms in the server's timezone | no | no | `1423578435043` |
@@ -35,7 +63,7 @@ The read-only JSON API currently supports 4 modes of query.
 | links | object of `${post number}: ${thread number}`<br>key-value pairs the current post is linking to | yes | no | `{"18":"17","27":"26"}` |
 | backlinks | object of `${post number}: ${thread number}`<br>key-value pairs the current post is linked by | yes | no | `{"4":"1","5":"1"}` |
 
-###Image object
+##Image object
 | Key | Value | Optional | Exclusive | Example |
 |:---:|:-----:|:--------:|:-------:|:--------:|
 | src | image file name as hosted on the server | no | no| `"1423578439604.webm"` |

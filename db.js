@@ -541,7 +541,7 @@ class Yakusoku extends events.EventEmitter {
 					extract(view, true);
 					if (bump)
 						m.incr(boardKey + ':bumpctr');
-					this._log(m, op, common.INSERT_POST, [view, bump], etc);
+					this._log(m, op, common.INSERT_POST, [view, +bump], etc);
 					m.exec(next);
 				},
 				function(res, next) {
