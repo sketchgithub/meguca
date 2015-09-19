@@ -1,11 +1,9 @@
-#define _XOPEN_SOURCE
 #include <errno.h>
 #include <iconv.h>
-#include <unistd.h>
+#include <openssl/des.h>
 #include <node.h>
 #include <string.h>
 #include <nan.h>
-
 using namespace v8;
 
 static char SECURE_SALT[21] = "$5$";
@@ -54,7 +52,7 @@ static void hash_trip(char *key, size_t len, char *dest) {
 		strncpy(salt, key + 1, 2);
 	fix_char(salt[0]);
 	fix_char(salt[1]);
-	digest = crypt(key, salt);
+	digest = DES_crypt(key, salt);
 	if (!digest)
 		return;
 	len = strlen(digest);
@@ -74,7 +72,7 @@ static void hash_secure(char *key, size_t len, char *dest) {
 	}
 	for (i = 0; i < len; i++)
 		fix_char(key[i]);
-	digest = crypt(key, SECURE_SALT);
+	digest = DES_crypt(key, SECURE_SALT);
 	if (!digest)
 		return;
 	len = strlen(digest);
@@ -99,7 +97,11 @@ static int setup_conv() {
 typedef void (*trip_f)(char *, size_t, char *);
 
 static void with_SJIS(Nan::Utf8String &trip, trip_f func, char *ret) {
-	char *src = *trip;
+	#ifdef WIN32
+		const char *src = *trip;
+	#else
+		char *src = *trip;
+	#endif
 	if (!src)
 		return;
 	size_t src_left = trip.length(), dest_left = TRIP_MAX;

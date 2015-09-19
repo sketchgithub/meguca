@@ -12,25 +12,30 @@
       "include_dirs" : [
         "<!(node -e \"require('nan')\")"
       ],
-      "sources": [ "src/findapng.cpp","src/apngDetector.cpp"]
+      "sources": [ "src/findapng.cpp","src/apngDetector.cpp"],
+	  'conditions': [
+			['OS=="win"',{
+				'defines': ['uint=unsigned int']
+			}]
+		]
     },
     {
       "target_name": "mnemonics",
       "include_dirs" : [
-        "<!(node -e \"require('nan')\")",
-        "<(node_root_dir)/deps/openssl/openssl/include"
+        "<!(node -e \"require('nan')\")"
       ],
       "sources": ["src/mnemonics.cpp","src/mnemonizer.cpp"],
-      "conditions": [
-        ["target_arch=='ia32'", {
-          "include_dirs": [ "<(node_root_dir)/deps/openssl/config/piii" ]
+      'conditions': [
+        [ 'OS=="win"', {
+		  'libraries': [
+			'<(module_root_dir)/src/deps/openssl/libeay32.lib'
+		  ]
+        }, { # OS!="win"
+          'include_dirs': [
+            # use node's bundled openssl headers on Unix platforms
+            '<(node_root_dir)/deps/openssl/openssl/include'
+          ],
         }],
-        ["target_arch=='x64'", {
-          "include_dirs": [ "<(node_root_dir)/deps/openssl/config/k8" ]
-        }],
-        ["target_arch=='arm'", {
-          "include_dirs": [ "<(node_root_dir)/deps/openssl/config/arm" ]
-        }]
       ]
     },
     {
@@ -39,22 +44,16 @@
        "<!(node -e \"require('nan')\")"
       ],
       "sources": ["src/tripcode.cc"],
-      "link_settings": {
-        "conditions": [
-          [
-            "OS==\"linux\"",
-            {"libraries": ["-lcrypt"]}
-          ],
-          [
-            "OS==\"freebsd\"",
-            {"libraries": ["-lcrypt"]}
-          ],
-          [
-            "OS==\"mac\"",
-            {"libraries": ["-lcrypto", "/usr/lib/libiconv.dylib"]}
-          ]
-        ]
-      }
-    }
-  ]
+	  "conditions": [
+		['OS=="win"',{
+			'dependencies': ['node_modules/iconv/binding.gyp:libiconv'],
+			'libraries': [ '<(module_root_dir)/src/deps/openssl/libeay32.lib']
+		}, { # OS!="win"
+			    'include_dirs': [
+					# use node's bundled openssl headers on Unix platforms
+					'<(node_root_dir)/deps/openssl/openssl/include'
+			    ]
+        }]
+      ]
+    }]
 }
