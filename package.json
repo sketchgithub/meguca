@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "node index",
-    "postinstall": "node scripts/bootstrap.js && node_modules/.bin/gulp client vendor mod css lang legacy"
+    "postinstall": "node scripts/bootstrap.js"
   },
   "dependencies": {
     "async": "^1.2.0",

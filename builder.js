@@ -7,6 +7,7 @@ const _ = require('underscore'),
 	config = require('./config'),
 	deps = require('./deps'),
 	child_process = require('child_process'),
+	path = require('path'),
 	watch = require('node-watch');
 
 let server;
@@ -19,7 +20,11 @@ const start_server = _.debounce(function() {
 }, 2000);
 
 function build(args, cb) {
-	var cp = child_process.spawn('./node_modules/.bin/gulp', args);
+	// Fucking Windows
+	let gulpPath = path.join('node_modules', '.bin', 'gulp');
+	if (process.platform === 'win32')
+		gulpPath += '.cmd';
+	var cp = child_process.spawn(gulpPath, args);
 	cp.stdout.pipe(process.stdout);
 	cp.stderr.pipe(process.stderr);
 	cp.on('error', function(err) {

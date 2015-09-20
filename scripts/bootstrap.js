@@ -3,7 +3,8 @@ Copies configuration files from examples on `npm install`, if none exist
  */
 'use strict';
 
-let fs = require('fs-extra'),
+const cp = require('child_process'),
+	fs = require('fs-extra'),
 	path = require('path');
 
 const examplePath = path.join('config', 'examples');
@@ -22,3 +23,12 @@ function copy(file) {
 for (let file of fs.readdirSync(examplePath)) {
 	copy(file);
 }
+
+// Fucking Windows
+let gulpPath = path.join('node_modules', '.bin', 'gulp');
+if (process.platform === 'win32')
+	gulpPath += '.cmd';
+const gulp = cp.spawn(gulpPath, ['client', 'vendor', 'css', 'mod', 'lang',
+	'legacy']);
+gulp.stdout.pipe(process.stdout);
+gulp.stderr.pipe(process.stderr);
