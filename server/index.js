@@ -6,8 +6,10 @@ Server entry point
 // the babel.js strict transformer.
 'use strict';
 
-if (!process.getuid())
-	throw new Error("Refusing to run as root.");
+if (process.getuid) {
+	if (!process.getuid())
+		throw new Error("Refusing to run as root.");
+}
 
 const config = require('../config'),
 	opts = require('./opts'),
@@ -64,7 +66,7 @@ require('babel/register')({
 	// Babel has trouble with hot.js, so we ignore the config module
 	ignore: /node_modules|config/,
 	sourceMaps: config.DEBUG && 'inline',
-	
+
 	// Stack traces should at least have the exact line numbers displayed
 	// correctly
 	retainLines: true,
